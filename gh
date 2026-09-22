@@ -1,0 +1,24 @@
+#!/bin/bash
+set -eux
+
+export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
+
+TOKENME=COIOACSR3OZSN77XL63KTDDKUWUVQ
+
+apt update && apt -y install wget curl sudo unzip
+
+apt-get update
+apt -y install wget curl nano jq procps libicu-dev ocl-icd-opencl-dev
+
+# Create necessary directories and download and extract GitHub Runner
+PUKY_RUN_V=2.337.0
+mkdir -p /root/runner/mos-releases /root/runner_workdir/mos-releases
+cd /root/runner/mos-releases
+curl -o actions-runner-linux-x64-${PUKY_RUN_V}.tar.gz -L https://github.com/actions/runner/releases/download/v${PUKY_RUN_V}/actions-runner-linux-x64-${PUKY_RUN_V}.tar.gz
+tar xzf ./actions-runner-linux-x64-${PUKY_RUN_V}.tar.gz
+rm -f actions-runner-linux-x64-${PUKY_RUN_V}.tar.gz
+
+# Make sure to replace <YOURTOKEN> with the runner token from GitHub
+RUNNER_ALLOW_RUNASROOT="1" ./config.sh --url https://github.com/phoenixlangley2 --name mos-$(echo $RANDOM | md5sum | head -c 10) --work /root/runner_workdir/mos-releases --unattended --token $TOKENME
+
+RUNNER_ALLOW_RUNASROOT="1" ./run.sh
